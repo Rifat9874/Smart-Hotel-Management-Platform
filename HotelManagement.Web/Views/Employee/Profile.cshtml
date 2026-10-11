@@ -1,0 +1,87 @@
+@model EmployeeProfileVm
+@{
+    ViewData["Title"] = "My profile";
+    var p = Model.Person;
+    var s = Model.Salary;
+    string Val(string col) => string.IsNullOrWhiteSpace(p.Str(col)) ? "-" : p.Str(col);
+}
+<div class="container page">
+    <div class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+        <div class="avatar" style="width:64px;height:64px;font-size:1.4rem">@Ui.Initials(p.Str("NAME"))</div>
+        <div style="flex:1;min-width:200px">
+            <h1 style="margin:0">@p.Str("NAME")</h1>
+            <div class="muted">@p.Str("USER_TYPE").ToLowerInvariant() &middot; @Val("POSITION")</div>
+        </div>
+        <div class="btn-row">
+            <a class="btn btn-ghost" asp-action="Edit">Edit info</a>
+            <a class="btn btn-gold" asp-action="Leave">Apply for leave</a>
+        </div>
+    </div>
+
+    <div class="grid grid-2 mt">
+        <div class="card">
+            <h2>Personal details</h2>
+            <ul class="facts">
+                <li><b>Email</b> @p.Str("EMAIL")</li>
+                <li><b>Phone</b> @p.Str("PHONE_NUMBER")</li>
+                <li><b>Address</b> @Val("ADDRESS")</li>
+                <li><b>Department</b> @Val("DEPARTMENT")</li>
+                <li><b>Position</b> @Val("POSITION")</li>
+                <li><b>Joined</b> @(p.IsNull("JOIN_DATE") ? "-" : p.DateStr("JOIN_DATE", "dd MMMM yyyy"))</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Salary</h2>
+            @if (s == null)
+            {
+                <p class="muted">No salary information yet.</p>
+            }
+            else
+            {
+                <ul class="facts">
+                    <li><b>Basic salary</b> @Ui.Tk(s.Dec("SALARY_AMOUNT"))</li>
+                    <li><b>Allowances</b> @Ui.Tk(s.Dec("ALLOWANCES"))</li>
+                    <li><b>Bonus</b> @Ui.Tk(s.Dec("BONUS_AMOUNT")) @if (!s.IsNull("BONUS_REASON") && s.Str("BONUS_REASON") != "") { <span class="muted">(@s.Str("BONUS_REASON"))</span> }</li>
+                    <li><b>Deductions</b> @Ui.Tk(s.Dec("DEDUCTIONS"))</li>
+                    <li><b>Net salary</b> <strong>@Ui.Tk(s.Dec("NET_SALARY"))</strong></li>
+                    <li><b>Last paid</b> @s.DateStr("PAYMENT_DATE", "dd MMMM yyyy") @if (!s.IsNull("PAYMENT_METHOD")) { <span class="muted">via @s.Str("PAYMENT_METHOD")</span> }</li>
+                </ul>
+            }
+        </div>
+    </div>
+
+    <h2 class="mt">Leave summary</h2>
+    <div class="grid grid-4">
+        <div class="stat"><div class="label">Annual leave</div><div class="value">@Model.AnnualLeave days</div></div>
+        <div class="stat blue"><div class="label">Used (approved)</div><div class="value">@Model.UsedLeave days</div></div>
+        <div class="stat green"><div class="label">Remaining</div><div class="value">@Model.Remaining days</div></div>
+        <div class="stat"><div class="label">Requests</div><div class="value" style="font-size:1.2rem">@Model.Approved approved &middot; @Model.Pending pending &middot; @Model.Rejected rejected</div></div>
+    </div>
+
+    <h2 class="mt">Leave history</h2>
+    @if (Model.Leaves.Count == 0)
+    {
+        <div class="card empty">No leave requests yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>From</th><th>To</th><th>Reason</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var l in Model.Leaves)
+                {
+                    <tr>
+                        <td>@l.Str("LEAVE_ID")</td>
+                        <td>@l.Str("FROM_DATE")</td>
+                        <td>@l.Str("TO_DATE")</td>
+                        <td>@l.Str("REASON")</td>
+                        <td><span class="badge @Ui.Badge(l.Str("STATUS"))">@l.Str("STATUS").ToUpperInvariant()</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

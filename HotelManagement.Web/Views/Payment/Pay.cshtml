@@ -1,0 +1,112 @@
+@model PayVm
+@{
+    ViewData["Title"] = "Payment";
+    var b = Model.Booking;
+    var id = b.Str("BOOKING_ID");
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Complete your payment</h1>
+            <p>Booking #@id is reserved for you. Pay now to confirm it.</p>
+        </div>
+    </div>
+
+    <div class="split">
+        <div class="card">
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="flash flash-error" style="margin:0 0 16px">@Model.Error</div>
+            }
+
+            <div class="notice" style="margin-bottom:18px">
+                <strong>Demo payment.</strong> No real money is charged on this site. Please do not enter real card or bank details.
+                Your CVV and full card number are never saved.
+            </div>
+
+            <form method="post" asp-action="Pay" asp-route-id="@id" data-pay-form data-booking-id="@id" class="stack" autocomplete="off">
+                <h3>Payment method</h3>
+                <div class="method-tabs">
+                    @foreach (var m in Lists.PaymentMethods)
+                    {
+                        <label>
+                            <input type="radio" name="method" value="@m" checked="@(Model.Method == m)" />
+                            @m
+                        </label>
+                    }
+                </div>
+
+                <div class="pay-panel" data-panel="card">
+                    <div class="field">
+                        <label for="cardNumber">Card number</label>
+                        <input id="cardNumber" name="cardNumber" type="text" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" data-card-number />
+                    </div>
+                    <div class="form-row mt">
+                        <div class="field">
+                            <label for="cardExpiry">Expiry</label>
+                            <input id="cardExpiry" name="cardExpiry" type="month" />
+                        </div>
+                        <div class="field">
+                            <label for="cvv">CVV</label>
+                            <input id="cvv" name="cvv" type="password" inputmode="numeric" maxlength="4" placeholder="***" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-panel" data-panel="mobile">
+                    <p class="hint">Pay with <strong data-mobile-label>mobile banking</strong>. Send the amount, then enter the transaction ID below.</p>
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="mobile">Mobile number</label>
+                            <input id="mobile" name="mobile" type="tel" inputmode="numeric" maxlength="11" placeholder="01XXXXXXXXX" />
+                        </div>
+                        <div class="field">
+                            <label for="trxId">Transaction ID</label>
+                            <input id="trxId" name="trxId" type="text" maxlength="40" />
+                        </div>
+                    </div>
+                    <div class="form-row mt">
+                        <div class="field">
+                            <label for="otp">OTP code</label>
+                            <input id="otp" name="otp" type="text" inputmode="numeric" maxlength="6" placeholder="6 digits" data-otp-field />
+                        </div>
+                        <div class="field" style="justify-content:flex-end">
+                            <button type="button" class="btn btn-ghost" data-send-otp="@Url.Action("SendOtp", "Payment")">Send OTP</button>
+                        </div>
+                    </div>
+                    <div class="otp-msg" data-otp-msg></div>
+                </div>
+
+                <div class="pay-panel" data-panel="bank">
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="bankName">Bank name</label>
+                            <input id="bankName" name="bankName" type="text" maxlength="30" />
+                        </div>
+                        <div class="field">
+                            <label for="bankAccount">Account number</label>
+                            <input id="bankAccount" name="bankAccount" type="text" inputmode="numeric" maxlength="30" />
+                        </div>
+                    </div>
+                    <div class="field mt">
+                        <label for="bankTrx">Transaction ID</label>
+                        <input id="bankTrx" name="bankTrx" type="text" maxlength="40" />
+                    </div>
+                </div>
+
+                <button class="btn btn-gold btn-lg btn-block" type="submit">Pay @Ui.Money(Model.Total)</button>
+            </form>
+        </div>
+
+        <aside class="card">
+            <h3>Booking summary</h3>
+            <div class="summary-line"><span>Booking</span><span>#@id</span></div>
+            <div class="summary-line"><span>Room</span><span>@b.Str("ROOM_ID") - @b.Str("TYPE")</span></div>
+            <div class="summary-line"><span>Check-in</span><span>@b.DateStr("CHECK_IN")</span></div>
+            <div class="summary-line"><span>Check-out</span><span>@b.DateStr("CHECK_OUT")</span></div>
+            <div class="summary-line"><span>@Model.Nights night@(Model.Nights == 1 ? "" : "s") x @Ui.Money(Model.Price)</span><span>@Ui.Money(Model.Total)</span></div>
+            <div class="summary-total"><span>Total</span><span>@Ui.Money(Model.Total)</span></div>
+            <p class="mt"><a asp-controller="Profile" asp-action="Index">Pay later from My Bookings</a></p>
+        </aside>
+    </div>
+</div>

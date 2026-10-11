@@ -1,0 +1,62 @@
+@model ReceptionVm
+@{
+    ViewData["Title"] = "Bookings";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Front desk</h1>
+            <p>Welcome, @Model.ReceptionistName. Manage guest bookings below.</p>
+        </div>
+        <div class="btn-row">
+            <a class="btn btn-gold" asp-action="QuickCheckOut">Quick check-out</a>
+        </div>
+    </div>
+
+    <div class="pill-row">
+        <a class="pill @(Model.Status == "" ? "active" : "")" asp-action="Index">All</a>
+        @foreach (var s in Lists.BookingStatuses)
+        {
+            <a class="pill @(Model.Status == s ? "active" : "")" asp-action="Index" asp-route-status="@s">@s</a>
+        }
+    </div>
+
+    @if (Model.Bookings.Count == 0)
+    {
+        <div class="card empty">No bookings found.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                @foreach (var b in Model.Bookings)
+                {
+                    var status = b.Str("BOOKING_STATUS").ToUpperInvariant();
+                    var id = b.Str("BOOKING_ID");
+                    <tr>
+                        <td>@id</td>
+                        <td>@b.Str("NAME")<div class="muted" style="font-size:.8rem">@b.Str("EMAIL")</div></td>
+                        <td>@b.Str("ROOM_ID")</td>
+                        <td class="nowrap">@b.DateStr("CHECK_IN")</td>
+                        <td class="nowrap">@b.DateStr("CHECK_OUT")</td>
+                        <td><span class="badge @Ui.Badge(status)">@status</span></td>
+                        <td>
+                            <div class="btn-row">
+                                <a class="btn btn-ghost btn-sm" asp-action="Booking" asp-route-id="@id">Update</a>
+                                @if (status == "CHECK-IN")
+                                {
+                                    <form asp-action="CheckOut" asp-route-id="@id" method="post" class="inline" data-confirm="Check out booking #@id?">
+                                        <button class="btn btn-sm" type="submit">Check-out</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Add employee";
+    var error = ViewData["Error"] as string;
+}
+<div class="container page" style="max-width:680px">
+    <div class="card">
+        <h1>Add employee</h1>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="flash flash-error" style="margin:0 0 16px">@error</div>
+        }
+        <form asp-action="AddEmployee" method="post" class="stack">
+            <div class="form-row">
+                <div class="field">
+                    <label for="type">Role</label>
+                    <select id="type" name="type" required>
+                        <option value="STAFF">Staff</option>
+                        <option value="RECEPTIONIST">Receptionist</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="salary">Monthly salary (BDT)</label>
+                    <input id="salary" name="salary" type="number" min="1" step="100" required />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="name">Full name</label>
+                    <input id="name" name="name" type="text" maxlength="50" required />
+                </div>
+                <div class="field">
+                    <label for="phone">Phone number</label>
+                    <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="11" required />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="email">Email (login)</label>
+                    <input id="email" name="email" type="email" maxlength="50" required />
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required />
+                    <span class="hint">At least 8 characters.</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="department">Department</label>
+                    <input id="department" name="department" type="text" maxlength="100" />
+                </div>
+                <div class="field">
+                    <label for="position">Position</label>
+                    <input id="position" name="position" type="text" maxlength="100" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="address">Address</label>
+                <input id="address" name="address" type="text" maxlength="255" />
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-gold" type="submit">Add employee</button>
+                <a class="btn btn-ghost" asp-action="Staff">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

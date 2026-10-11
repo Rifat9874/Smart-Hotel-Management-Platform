@@ -1,0 +1,43 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Reviews";
+    var avg = Model.Count == 0 ? 0.0 : Model.Average(r => (double)r.Int("RATING"));
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Guest reviews</h1>
+            <p>@Model.Count review@(Model.Count == 1 ? "" : "s")@(Model.Count > 0 ? " - average " + avg.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + " / 5" : "")</p>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card empty">No reviews yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Date</th><th>Guest</th><th>Booking</th><th>Rating</th><th>Comments</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td class="nowrap">@(r.IsNull("REVIEW_DATE") ? "-" : r.DateStr("REVIEW_DATE"))</td>
+                        <td>@r.Str("NAME")</td>
+                        <td>#@r.Str("BOOKING_ID")</td>
+                        <td class="nowrap" style="color:var(--gold)">@Ui.Stars(r.Int("RATING"))</td>
+                        <td>@r.Str("COMMENTS")</td>
+                        <td class="right">
+                            <form asp-action="DeleteReview" asp-route-id="@r.Int("REVIEW_ID")" method="post" class="inline" data-confirm="Delete this review?">
+                                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

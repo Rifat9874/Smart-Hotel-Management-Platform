@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Login";
+    var demo = ViewData["DemoMode"] is bool d && d;
+    var error = ViewData["Error"] as string;
+}
+<div class="auth">
+    <div class="auth-art" style="background-image:url('/img/site/bed.jpg')">
+        <div>
+            <div class="eyebrow">Welcome back</div>
+            <h2>Your room is waiting.</h2>
+            <p class="muted-light">Log in to book rooms, pay online and manage your stay.</p>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="auth-box">
+            <h1>Login</h1>
+            <p class="muted">Enter your email and password.</p>
+
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="flash flash-error" style="margin:0 0 16px">@error</div>
+            }
+
+            <form asp-action="Login" method="post" class="stack">
+                <input type="hidden" name="returnUrl" value="@(ViewData["ReturnUrl"] as string)" />
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="username" required maxlength="50" />
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required />
+                </div>
+                <button class="btn btn-block btn-lg" type="submit">Login</button>
+            </form>
+
+            <p class="mt"><a asp-action="ForgotPassword">Forgot password?</a></p>
+            <p>New here? <a asp-action="Register">Create an account</a></p>
+
+            @if (demo)
+            {
+                <div class="demo-box">
+                    <strong>Demo accounts</strong> (project demo)
+                    <div class="demo-line"><b>Admin</b> <code>@DbSetup.DemoAdminEmail</code> / <code>@DbSetup.DemoAdminPassword</code></div>
+                    <div class="demo-line"><b>Receptionist</b> <code>@DbSetup.DemoReceptionEmail</code> / <code>@DbSetup.DemoReceptionPassword</code></div>
+                    <div class="demo-line"><b>Staff</b> <code>@DbSetup.DemoStaffEmail</code> / <code>@DbSetup.DemoStaffPassword</code></div>
+                    <div class="demo-line"><b>Customer</b> <code>@DbSetup.DemoGuestEmail</code> / <code>@DbSetup.DemoGuestPassword</code></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

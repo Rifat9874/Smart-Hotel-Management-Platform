@@ -1,0 +1,91 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<HotelInfo> Hotel
+@{
+    ViewData["Title"] = "Luxury Hotel & Resort";
+    var amenities = new (string Name, string? Icon, string Emoji)[]
+    {
+        ("Swimming Pool", "pool", ""),
+        ("Buffet Breakfast", "breakfast", ""),
+        ("SPA & Thai Massage", "spa", ""),
+        ("Fitness Center", "gym", ""),
+        ("Wi-Fi Internet", "wifi", ""),
+        ("Airport Pickup", "plane", ""),
+        ("Travel Desk", "travel", ""),
+        ("On the Rocks (Bar)", "drinks", ""),
+        ("Welcome Drinks", "drinks", ""),
+        ("Coffee & Pastry Shop", null, "\u2615"),
+        ("Laundry Service", null, "\U0001F9FA"),
+        ("Doctor on Call", null, "\U0001FA7A"),
+        ("Men's Parlor", null, "\U0001F488"),
+        ("Mini Fridge", null, "\U0001F9CA"),
+    };
+}
+
+<section class="hero" style="background-image:url('/img/site/hero.jpg')">
+    <div class="container">
+        <div class="eyebrow">Luxury Hotel &amp; Resort</div>
+        <h1>Welcome to <span>@Hotel.Value.Name</span></h1>
+        <p>Wake up to the Bay of Bengal. Comfortable suites, warm service and everything you need for a perfect stay in Cox's Bazar.</p>
+        <div class="btn-row">
+            <a class="btn btn-gold btn-lg" asp-controller="Rooms" asp-action="Index">Book a Room</a>
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="btn btn-outline btn-lg" asp-controller="Account" asp-action="Login">Login</a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-title">
+            <div class="eyebrow" style="color:var(--gold-dark)">Everything you need</div>
+            <h2>Hotel Amenities</h2>
+            <p>From a morning swim to an evening drink on the rocks, we have you covered.</p>
+        </div>
+        <div class="grid grid-auto" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+            @foreach (var a in amenities)
+            {
+                <div class="amenity">
+                    @if (a.Icon != null)
+                    {
+                        <img src="~/img/icons/@(a.Icon).png" alt="" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div style="font-size:2.4rem;line-height:56px;height:56px;margin-bottom:10px">@a.Emoji</div>
+                    }
+                    <span>@a.Name</span>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background:#fff">
+    <div class="container grid grid-2" style="align-items:center;gap:40px">
+        <img class="feature-img" src="~/img/site/lobby.jpg" alt="Hotel lobby and lounge" loading="lazy" />
+        <div>
+            <div class="eyebrow" style="color:var(--gold-dark)">Rooms &amp; Suites</div>
+            <h2>Fourteen rooms, one great stay</h2>
+            <p class="muted">Presidential and Royal suites, family and honeymoon suites, comfortable deluxe, single, double and twin rooms. Check availability for your dates, pick a room and pay online in a minute.</p>
+            <ul class="facts">
+                <li><b>Check-in</b> from 2:00 PM</li>
+                <li><b>Check-out</b> until 12:00 PM</li>
+                <li><b>Payment</b> Card, bKash, Rocket, Nagad or bank transfer</li>
+            </ul>
+            <p class="mt"><a class="btn" asp-controller="Rooms" asp-action="Index">See all rooms</a></p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container center">
+        <h2>Contact us</h2>
+        <p class="muted">@Hotel.Value.Address</p>
+        @if (!string.IsNullOrWhiteSpace(Hotel.Value.Phone))
+        {
+            <p><strong>&#9742; @Hotel.Value.Phone</strong></p>
+        }
+    </div>
+</section>

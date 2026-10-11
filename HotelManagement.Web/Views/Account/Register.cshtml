@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Create account";
+    var errors = ViewData["Errors"] as Dictionary<string, string> ?? new Dictionary<string, string>();
+    string Err(string key) => errors.TryGetValue(key, out var v) ? v : "";
+}
+<div class="auth">
+    <div class="auth-art" style="background-image:url('/img/site/bed.jpg')">
+        <div>
+            <div class="eyebrow">Join us</div>
+            <h2>Book in minutes.</h2>
+            <p class="muted-light">Create a free account to reserve rooms and facilities.</p>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="auth-box">
+            <h1>Create account</h1>
+            <p class="muted">Customer registration</p>
+
+            <form asp-action="Register" method="post" class="stack" novalidate>
+                <div class="field">
+                    <label for="name">Full name</label>
+                    <input id="name" name="name" type="text" maxlength="50" value="@(ViewData["name"] as string)" required />
+                    @if (Err("name") != "") { <div class="field-error">@Err("name")</div> }
+                </div>
+                <div class="field">
+                    <label for="phone">Phone number</label>
+                    <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="11" placeholder="01XXXXXXXXX" value="@(ViewData["phone"] as string)" required />
+                    @if (Err("phone") != "") { <div class="field-error">@Err("phone")</div> }
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" maxlength="50" value="@(ViewData["email"] as string)" required />
+                    @if (Err("email") != "") { <div class="field-error">@Err("email")</div> }
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required />
+                    <span class="hint">At least 8 characters.</span>
+                </div>
+                <div class="field">
+                    <label for="confirm">Confirm password</label>
+                    <input id="confirm" name="confirm" type="password" autocomplete="new-password" required />
+                    @if (Err("password") != "") { <div class="field-error">@Err("password")</div> }
+                </div>
+                <button class="btn btn-block btn-lg" type="submit">Register</button>
+            </form>
+            <p class="mt">Already have an account? <a asp-action="Login">Login</a></p>
+        </div>
+    </div>
+</div>

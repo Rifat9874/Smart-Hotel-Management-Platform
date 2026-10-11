@@ -1,0 +1,52 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Facility bookings";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Facility bookings</h1>
+            <p>Pool, spa, gym, breakfast and business center reservations.</p>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card empty">No facility bookings yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Guest</th><th>Facility</th><th>Date</th><th class="num">Guests / hours</th><th class="num">Total</th><th>Status</th><th>Change status</th></tr></thead>
+                <tbody>
+                @foreach (var f in Model)
+                {
+                    var id = f.Str("FACILITY_BOOKING_ID");
+                    var status = f.Str("BOOKING_STATUS").ToUpperInvariant();
+                    <tr>
+                        <td>@id</td>
+                        <td>@f.Str("NAME")</td>
+                        <td>@f.Str("FACILITY_NAME")</td>
+                        <td class="nowrap">@f.DateStr("BOOKING_DATE")</td>
+                        <td class="num">@f.Str("GUESTS_COUNT")</td>
+                        <td class="num">@Ui.Money(f.Dec("TOTAL_PRICE"))</td>
+                        <td><span class="badge @Ui.Badge(status)">@status</span></td>
+                        <td>
+                            <form asp-action="FacilityStatus" asp-route-id="@id" method="post" class="mini-form">
+                                <select name="status" style="width:auto;padding:6px 8px">
+                                    @foreach (var s in Lists.FacilityStatuses)
+                                    {
+                                        <option value="@s" selected="@(s == status)">@s</option>
+                                    }
+                                </select>
+                                <button class="btn btn-sm" type="submit">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelManagement.Web</RootNamespace>
+    <AssemblyName>HotelManagement.Web</AssemblyName>
+    <!-- Keeps the published folder small (Somee free plan = 150 MB) -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SQL Server access (replaces System.Data.SqlClient from the WinForms project) -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <!-- PDF receipts (same library family the WinForms project used) -->
+    <PackageReference Include="itext" Version="9.3.0" />
+    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.3.0" />
+    <!-- iText reads this at start-up; pinning a modern version keeps it in sync with .NET 8 -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Database schema is embedded so /Setup can create the tables for you -->
+    <EmbeddedResource Include="Data\schema.sql" />
+  </ItemGroup>
+
+</Project>

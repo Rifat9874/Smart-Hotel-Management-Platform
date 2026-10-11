@@ -1,0 +1,70 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Leave";
+    var today = ViewData["Today"] as string ?? "";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Leave application</h1>
+            <p>Ask for time off. The admin will approve or dismiss your request.</p>
+        </div>
+    </div>
+
+    <div class="split">
+        <div>
+            <h2>My requests</h2>
+            @if (Model.Count == 0)
+            {
+                <div class="card empty">No leave requests yet.</div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>From</th><th>To</th><th>Reason</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var l in Model)
+                        {
+                            <tr>
+                                <td>@l.Str("LEAVE_ID")</td>
+                                <td class="nowrap">@l.Str("FROM_DATE")</td>
+                                <td class="nowrap">@l.Str("TO_DATE")</td>
+                                <td>@l.Str("REASON")</td>
+                                <td><span class="badge @Ui.Badge(l.Str("STATUS"))">@l.Str("STATUS").ToUpperInvariant()</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <h2>New request</h2>
+            <form asp-action="Leave" method="post" class="stack">
+                <div class="form-row">
+                    <div class="field">
+                        <label for="fromDate">From</label>
+                        <input id="fromDate" name="fromDate" type="date" min="@today" value="@today" required />
+                    </div>
+                    <div class="field">
+                        <label for="toDate">To</label>
+                        <input id="toDate" name="toDate" type="date" min="@today" value="@today" required />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="reason">Reason</label>
+                    <select id="reason" name="reason" required>
+                        <option value="">Select a reason</option>
+                        @foreach (var r in Lists.LeaveReasons)
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    </select>
+                </div>
+                <button class="btn btn-gold" type="submit">Submit request</button>
+            </form>
+        </div>
+    </div>
+</div>

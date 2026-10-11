@@ -1,0 +1,50 @@
+@model Row
+@{
+    var id = Model.Str("BOOKING_ID");
+    var status = Model.Str("BOOKING_STATUS").ToUpperInvariant();
+    ViewData["Title"] = "Booking #" + id;
+    var ci = Model.Date("CHECK_IN") ?? DateTime.Today;
+    var co = Model.Date("CHECK_OUT") ?? DateTime.Today;
+    var nights = Math.Max(1, (co - ci).Days);
+}
+<div class="container page" style="max-width:760px">
+    <p><a asp-action="Index">&larr; All bookings</a></p>
+    <div class="card">
+        <div class="page-head">
+            <div>
+                <h1>Booking #@id</h1>
+                <p>Current status: <span class="badge @Ui.Badge(status)">@status</span></p>
+            </div>
+        </div>
+
+        <ul class="facts">
+            <li><b>Guest</b> @Model.Str("NAME")</li>
+            <li><b>Email</b> @Model.Str("EMAIL")</li>
+            <li><b>Phone</b> @Model.Str("PHONE_NUMBER")</li>
+            <li><b>Room</b> @Model.Str("ROOM_ID") - @Model.Str("TYPE")</li>
+            <li><b>Check-in</b> @Model.DateStr("CHECK_IN")</li>
+            <li><b>Check-out</b> @Model.DateStr("CHECK_OUT") (@nights night@(nights == 1 ? "" : "s"))</li>
+            <li><b>Booked on</b> @Model.Str("BOOKING_DATE")</li>
+            <li><b>Amount</b> @Ui.Money(Model.Int("PPN") * nights)</li>
+        </ul>
+
+        <h3 class="mt">Change status</h3>
+        <div class="btn-row">
+            <form asp-action="SetStatus" asp-route-id="@id" method="post" class="inline">
+                <input type="hidden" name="status" value="BOOKED" />
+                <button class="btn" type="submit" disabled="@(status == "BOOKED")">Mark as Booked</button>
+            </form>
+            <form asp-action="SetStatus" asp-route-id="@id" method="post" class="inline">
+                <input type="hidden" name="status" value="CHECK-IN" />
+                <button class="btn btn-ok" type="submit" disabled="@(status == "CHECK-IN")">Check-in</button>
+            </form>
+            <form asp-action="SetStatus" asp-route-id="@id" method="post" class="inline">
+                <input type="hidden" name="status" value="CHECK-OUT" />
+                <button class="btn btn-gold" type="submit" disabled="@(status == "CHECK-OUT")">Check-out</button>
+            </form>
+            <form asp-action="Remove" asp-route-id="@id" method="post" class="inline" data-confirm="Remove booking #@id permanently (with its payment and review)?">
+                <button class="btn btn-danger" type="submit">Remove booking</button>
+            </form>
+        </div>
+    </div>
+</div>

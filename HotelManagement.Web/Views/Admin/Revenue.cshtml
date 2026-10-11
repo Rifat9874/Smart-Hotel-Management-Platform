@@ -1,0 +1,64 @@
+@model DateRangeVm
+@{
+    ViewData["Title"] = "Revenue";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Revenue</h1>
+            <p>Paid bookings grouped by the day they were made. Pending and cancelled bookings are not counted.</p>
+        </div>
+    </div>
+
+    <form method="get" asp-action="Revenue" class="filter-bar">
+        <div class="field">
+            <label for="type">Group by</label>
+            <select id="type" name="type">
+                <option value="Daily" selected="@(Model.Type == "Daily")">Daily</option>
+                <option value="Monthly" selected="@(Model.Type == "Monthly")">Monthly</option>
+                <option value="Yearly" selected="@(Model.Type == "Yearly")">Yearly</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="fromDate">From</label>
+            <input id="fromDate" name="fromDate" type="date" value="@Ui.D(Model.From)" />
+        </div>
+        <div class="field">
+            <label for="toDate">To</label>
+            <input id="toDate" name="toDate" type="date" value="@Ui.D(Model.To)" />
+        </div>
+        <button class="btn btn-gold" type="submit">Show</button>
+    </form>
+
+    <div class="grid grid-2 mb">
+        <div class="stat green"><div class="label">Total revenue</div><div class="value">@Ui.Money(Model.TotalRevenue)</div></div>
+        <div class="stat blue"><div class="label">Bookings</div><div class="value">@Model.TotalBookings</div></div>
+    </div>
+
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="card empty">No revenue in this period.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>@Model.Type period</th><th class="num">Bookings</th><th class="num">Revenue (BDT)</th></tr></thead>
+                <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@r.Str("PERIOD_NAME")</td>
+                        <td class="num">@r.Int("BOOKINGS")</td>
+                        <td class="num">@r.Dec("REVENUE").ToString("N0", inv)</td>
+                    </tr>
+                }
+                </tbody>
+                <tfoot>
+                    <tr><td>Total</td><td class="num">@Model.TotalBookings</td><td class="num">@Model.TotalRevenue.ToString("N0", inv)</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+</div>

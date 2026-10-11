@@ -1,0 +1,47 @@
+@model StaffVm
+@{
+    ViewData["Title"] = "Team tasks";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Housekeeping team</h1>
+            <p>Welcome, @Model.StaffName. All room assignments for the team.</p>
+        </div>
+        <a class="btn btn-gold" asp-action="MyTasks">My tasks</a>
+    </div>
+
+    <form method="get" asp-action="Index" class="filter-bar">
+        <div class="field">
+            <label for="q">Search by staff name</label>
+            <input id="q" name="q" type="text" value="@Model.Search" maxlength="50" />
+        </div>
+        <button class="btn" type="submit">Search</button>
+        @if (Model.Search != "") { <a class="btn btn-ghost" asp-action="Index">Clear</a> }
+    </form>
+
+    @if (Model.Assignments.Count == 0)
+    {
+        <div class="card empty">No assignments found.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Room</th><th>Staff</th><th>Assigned on</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var a in Model.Assignments)
+                {
+                    <tr>
+                        <td>@a.Str("ASSIGNMENT_ID")</td>
+                        <td>@a.Str("ROOM_ID")</td>
+                        <td>@a.Str("NAME")</td>
+                        <td>@a.DateStr("ASSIGNED_DATE")</td>
+                        <td><span class="badge @Ui.Badge(a.Str("ROOM_STATUS"))">@a.Str("ROOM_STATUS").ToUpperInvariant()</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

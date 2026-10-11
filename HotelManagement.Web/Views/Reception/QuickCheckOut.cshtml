@@ -1,0 +1,44 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Quick check-out";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Quick check-out</h1>
+            <p>Guests who are currently checked in.</p>
+        </div>
+        <a class="btn btn-ghost" asp-action="Index">All bookings</a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card empty">Nobody is checked in right now.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var b in Model)
+                {
+                    var id = b.Str("BOOKING_ID");
+                    <tr>
+                        <td>@id</td>
+                        <td>@b.Str("NAME")</td>
+                        <td>@b.Str("ROOM_ID")</td>
+                        <td class="nowrap">@b.DateStr("CHECK_IN")</td>
+                        <td class="nowrap">@b.DateStr("CHECK_OUT")</td>
+                        <td class="right">
+                            <form asp-action="CheckOut" asp-route-id="@id" asp-route-back="quick" method="post" class="inline" data-confirm="Check out @b.Str("NAME") from room @b.Str("ROOM_ID")?">
+                                <button class="btn btn-gold btn-sm" type="submit">Check-out</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

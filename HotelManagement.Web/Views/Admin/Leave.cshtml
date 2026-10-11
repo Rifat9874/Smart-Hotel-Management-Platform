@@ -1,0 +1,81 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Leave requests";
+    var pending = Model.Where(l => l.Str("STATUS").Equals("Pending", StringComparison.OrdinalIgnoreCase)).ToList();
+    var decided = Model.Where(l => !l.Str("STATUS").Equals("Pending", StringComparison.OrdinalIgnoreCase)).ToList();
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Leave requests</h1>
+            <p>@pending.Count waiting for a decision.</p>
+        </div>
+    </div>
+
+    <h2>Pending</h2>
+    @if (pending.Count == 0)
+    {
+        <div class="card empty">No pending requests.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Employee</th><th>Role</th><th>From</th><th>To</th><th>Reason</th><th>Decision</th></tr></thead>
+                <tbody>
+                @foreach (var l in pending)
+                {
+                    var id = l.Str("LEAVE_ID");
+                    <tr>
+                        <td>@id</td>
+                        <td>@l.Str("NAME")</td>
+                        <td>@l.Str("USER_TYPE").ToLowerInvariant()</td>
+                        <td class="nowrap">@l.Str("FROM_DATE")</td>
+                        <td class="nowrap">@l.Str("TO_DATE")</td>
+                        <td>@l.Str("REASON")</td>
+                        <td>
+                            <div class="btn-row">
+                                <form asp-action="DecideLeave" asp-route-id="@id" method="post" class="inline">
+                                    <input type="hidden" name="decision" value="APPROVED" />
+                                    <button class="btn btn-ok btn-sm" type="submit">Approve</button>
+                                </form>
+                                <form asp-action="DecideLeave" asp-route-id="@id" method="post" class="inline">
+                                    <input type="hidden" name="decision" value="DISMISSED" />
+                                    <button class="btn btn-danger btn-sm" type="submit">Dismiss</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <h2 class="mt">Decided</h2>
+    @if (decided.Count == 0)
+    {
+        <div class="card empty">Nothing here yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Employee</th><th>From</th><th>To</th><th>Reason</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var l in decided)
+                {
+                    <tr>
+                        <td>@l.Str("LEAVE_ID")</td>
+                        <td>@l.Str("NAME")</td>
+                        <td class="nowrap">@l.Str("FROM_DATE")</td>
+                        <td class="nowrap">@l.Str("TO_DATE")</td>
+                        <td>@l.Str("REASON")</td>
+                        <td><span class="badge @Ui.Badge(l.Str("STATUS"))">@l.Str("STATUS").ToUpperInvariant()</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

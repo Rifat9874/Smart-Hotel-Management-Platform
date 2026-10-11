@@ -1,0 +1,32 @@
+@model Facility
+@{
+    ViewData["Title"] = "Book " + Model.Name;
+    var today = ViewData["Today"] as string ?? "";
+}
+<div class="container page" style="max-width:560px">
+    <div class="card" data-facility data-price="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+        <div class="center">
+            <img src="~/img/icons/@(Model.Icon).png" alt="" style="width:72px;margin:0 auto 8px;mix-blend-mode:multiply" />
+            <h1>@Model.Name</h1>
+            <p class="muted">@Model.Description</p>
+            <div class="price">@Ui.Money(Model.Price) <small>@Model.Unit</small></div>
+        </div>
+
+        <form asp-action="Book" asp-route-name="@Model.Name" method="post" class="stack mt">
+            <div class="field">
+                <label for="date">Date</label>
+                <input id="date" name="date" type="date" min="@today" value="@today" required />
+            </div>
+            <div class="field">
+                <label for="units">@Model.UnitLabel</label>
+                <input id="units" name="units" type="number" min="1" max="@Model.MaxUnits" value="1" required />
+                <span class="hint">Maximum @Model.MaxUnits per booking.</span>
+            </div>
+            <div class="summary-total"><span>Total</span><span data-total>@Ui.Money(Model.Price)</span></div>
+            <div class="btn-row">
+                <button class="btn btn-gold" type="submit">Confirm booking</button>
+                <a class="btn btn-ghost" asp-action="Index">Back</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,111 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<HotelInfo> Hotel
+@{
+    var role = User.Identity?.IsAuthenticated == true ? User.Role() : "";
+    var pageTitle = ViewData["Title"] as string;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(string.IsNullOrEmpty(pageTitle) ? Hotel.Value.Name : pageTitle + " - " + Hotel.Value.Name)</title>
+    <meta name="description" content="@Hotel.Value.Name - luxury hotel and resort booking, Cox's Bazar." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A8%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-mark">&#9670;</span>
+            <span>@Hotel.Value.Name</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-label="Menu" data-nav-toggle>&#9776;</button>
+        <nav class="nav" id="mainNav">
+            @if (role == "")
+            {
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                <a asp-controller="Rooms" asp-action="Index">Rooms</a>
+                <a asp-controller="Account" asp-action="Login">Login</a>
+                <a class="btn btn-gold btn-sm" asp-controller="Account" asp-action="Register">Register</a>
+            }
+            else if (role == "CUSTOMER")
+            {
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                <a asp-controller="Rooms" asp-action="Index">Rooms</a>
+                <a asp-controller="Facilities" asp-action="Index">Facilities</a>
+                <a asp-controller="Profile" asp-action="Index">My Bookings</a>
+            }
+            else if (role == "RECEPTIONIST")
+            {
+                <a asp-controller="Reception" asp-action="Index">Bookings</a>
+                <a asp-controller="Reception" asp-action="QuickCheckOut">Check-out</a>
+                <a asp-controller="Employee" asp-action="Leave">Leave</a>
+                <a asp-controller="Employee" asp-action="Profile">My Profile</a>
+            }
+            else if (role == "STAFF")
+            {
+                <a asp-controller="Staff" asp-action="Index">Team Tasks</a>
+                <a asp-controller="Staff" asp-action="MyTasks">My Tasks</a>
+                <a asp-controller="Employee" asp-action="Leave">Leave</a>
+                <a asp-controller="Employee" asp-action="Profile">My Profile</a>
+            }
+            else if (role == "ADMIN")
+            {
+                <a asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
+                <a asp-controller="Admin" asp-action="Leave">Leave</a>
+                <a asp-controller="Admin" asp-action="Rooms">Rooms</a>
+                <a asp-controller="Admin" asp-action="AssignTask">Tasks</a>
+                <a asp-controller="Admin" asp-action="Users">Users</a>
+                <a asp-controller="Admin" asp-action="Staff">Staff</a>
+                <a asp-controller="Admin" asp-action="Reviews">Reviews</a>
+                <a asp-controller="Admin" asp-action="FacilityBookings">Facilities</a>
+                <a asp-controller="Admin" asp-action="Revenue">Revenue</a>
+                <a asp-controller="Admin" asp-action="Reports">Reports</a>
+            }
+
+            @if (role != "")
+            {
+                <span class="nav-user">
+                    <span class="avatar" title="@User.FullName()">@Ui.Initials(User.FullName())</span>
+                    <span class="nav-user-name">@User.FullName() <small>(@role.ToLowerInvariant())</small></span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                        <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+                    </form>
+                </span>
+            }
+        </nav>
+    </div>
+</header>
+
+<main>
+    @if (TempData["flash"] is string flash)
+    {
+        <div class="container">
+            <div class="flash @((TempData["flashType"] as string) == "error" ? "flash-error" : "flash-ok")" role="alert">@flash</div>
+        </div>
+    }
+    @RenderBody()
+</main>
+
+<footer class="footer">
+    <div class="container footer-inner">
+        <div>
+            <strong>@Hotel.Value.Name</strong><br />
+            <span class="muted-light">@Hotel.Value.Address</span>
+        </div>
+        <div class="footer-right">
+            @if (!string.IsNullOrWhiteSpace(Hotel.Value.Phone))
+            {
+                <span>&#9742; @Hotel.Value.Phone</span><br />
+            }
+            <span class="muted-light">University project - demo hotel. Payments on this site are simulated.</span>
+        </div>
+    </div>
+</footer>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

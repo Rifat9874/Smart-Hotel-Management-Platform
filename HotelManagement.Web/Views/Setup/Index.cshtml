@@ -1,0 +1,80 @@
+@model SetupStatus
+@{
+    ViewData["Title"] = "Database setup";
+    var log = ViewData["Log"] as List<string>;
+    var setupError = ViewData["SetupError"] as string;
+    var ready = Model.Connected && Model.MissingTables.Count == 0;
+}
+<div class="container page" style="max-width:820px">
+    <h1>Database setup</h1>
+    <p class="muted">Use this page once after you upload the site. It checks the database connection and creates anything that is missing. It never deletes or overwrites your data.</p>
+
+    <div class="card">
+        <h2>1. Connection</h2>
+        @if (Model.Connected)
+        {
+            <p><span class="badge b-ok">CONNECTED</span> The website can talk to SQL Server.</p>
+        }
+        else
+        {
+            <p><span class="badge b-bad">NOT CONNECTED</span></p>
+            <div class="errbox">@Model.Message</div>
+            <p class="mt">Fix <code>ConnectionStrings:Default</code> in <code>appsettings.json</code> (see README, step 3), then refresh this page.</p>
+        }
+    </div>
+
+    @if (Model.Connected)
+    {
+        <div class="card">
+            <h2>2. Tables</h2>
+            @if (Model.MissingTables.Count == 0)
+            {
+                <p><span class="badge b-ok">ALL 11 TABLES FOUND</span></p>
+            }
+            else
+            {
+                <p><span class="badge b-warn">MISSING</span> @string.Join(", ", Model.MissingTables)</p>
+            }
+
+            @if (Model.Counts.Count > 0)
+            {
+                <div class="table-wrap" style="box-shadow:none">
+                    <table>
+                        <thead><tr><th>Table</th><th class="num">Rows</th></tr></thead>
+                        <tbody>
+                        @foreach (var kv in Model.Counts)
+                        {
+                            <tr><td>@kv.Key</td><td class="num">@kv.Value</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <h2>3. Create tables &amp; demo data</h2>
+            <p class="muted">Creates the missing tables, adds the 14 rooms (only if there are none) and four demo accounts (only if there are no users). If you restored your own database backup, nothing of yours is changed.</p>
+
+            @if (log != null)
+            {
+                <div class="flash flash-ok" style="margin:0 0 16px">
+                    @foreach (var line in log) { <div>&#10003; @line</div> }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(setupError))
+            {
+                <div class="errbox" style="margin-bottom:16px">@setupError</div>
+            }
+
+            <form asp-action="Run" method="post">
+                <button class="btn btn-gold btn-lg" type="submit">Create tables &amp; demo data</button>
+            </form>
+
+            @if (ready)
+            {
+                <p class="mt"><a class="btn" asp-controller="Account" asp-action="Login">Go to login</a></p>
+            }
+        </div>
+    }
+</div>

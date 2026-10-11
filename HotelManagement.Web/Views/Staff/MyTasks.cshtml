@@ -1,0 +1,94 @@
+@model MyTasksVm
+@{
+    ViewData["Title"] = "My tasks";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>My tasks</h1>
+            <p>Rooms assigned to you. Mark a room as cleaned when you finish.</p>
+        </div>
+        <a class="btn btn-ghost" asp-action="Index">Team tasks</a>
+    </div>
+
+    @if (Model.Tasks.Count == 0)
+    {
+        <div class="card empty">You have no assigned rooms.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Room</th><th>Assigned on</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var t in Model.Tasks)
+                {
+                    var status = t.Str("ROOM_STATUS").ToUpperInvariant();
+                    <tr>
+                        <td>@t.Str("ASSIGNMENT_ID")</td>
+                        <td>@t.Str("ROOM_ID")</td>
+                        <td>@t.DateStr("ASSIGNED_DATE")</td>
+                        <td><span class="badge @Ui.Badge(status)">@status</span></td>
+                        <td class="right">
+                            @if (status != "CLEANED")
+                            {
+                                <form asp-action="Complete" asp-route-id="@t.Str("ASSIGNMENT_ID")" method="post" class="inline">
+                                    <button class="btn btn-ok btn-sm" type="submit">Mark complete</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="grid grid-2 mt">
+        <div class="card">
+            <h2>Report a maintenance problem</h2>
+            @if (Model.MyRooms.Count == 0)
+            {
+                <p class="muted">You can report problems for rooms assigned to you.</p>
+            }
+            else
+            {
+                <form asp-action="ReportProblem" method="post" class="stack">
+                    <div class="field">
+                        <label for="roomId">Room</label>
+                        <select id="roomId" name="roomId" required>
+                            <option value="">Select a room</option>
+                            @foreach (var r in Model.MyRooms) { <option value="@r">@r</option> }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="problem">Problem</label>
+                        <select id="problem" name="problem" required>
+                            <option value="">Select a problem</option>
+                            @foreach (var p in Lists.MaintenanceProblems) { <option value="@p">@p</option> }
+                        </select>
+                    </div>
+                    <button class="btn btn-gold" type="submit">Send to admin</button>
+                </form>
+            }
+        </div>
+
+        <div class="card">
+            <h2>My requests</h2>
+            @if (Model.MyRequests.Count == 0)
+            {
+                <p class="muted">No maintenance requests yet.</p>
+            }
+            else
+            {
+                foreach (var m in Model.MyRequests)
+                {
+                    <div style="padding:10px 0;border-bottom:1px dashed var(--line)">
+                        <div><strong>@m.Str("M_ID")</strong> &middot; Room @m.Str("ROOM_ID") <span class="badge @Ui.Badge(m.Str("STATUS"))">@m.Str("STATUS").ToUpperInvariant()</span></div>
+                        <div class="muted">@m.Str("PROBLEM") &middot; @m.Str("SUBMIT_DATE")</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

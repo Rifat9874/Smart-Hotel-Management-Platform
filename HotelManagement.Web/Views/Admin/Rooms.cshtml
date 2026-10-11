@@ -1,0 +1,77 @@
+@model AdminRoomsVm
+@{
+    ViewData["Title"] = "Rooms & maintenance";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Rooms &amp; maintenance</h1>
+            <p>Handle repair requests from staff and set room prices.</p>
+        </div>
+    </div>
+
+    <h2>Open maintenance requests</h2>
+    @if (Model.Maintenance.Count == 0)
+    {
+        <div class="card empty">No open maintenance requests.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Room</th><th>Problem</th><th>Reported by</th><th>Submitted</th><th>Status</th><th>Update</th></tr></thead>
+                <tbody>
+                @foreach (var m in Model.Maintenance)
+                {
+                    var id = m.Str("M_ID");
+                    var status = m.Str("STATUS").ToUpperInvariant();
+                    <tr>
+                        <td>@id</td>
+                        <td>@m.Str("ROOM_ID")</td>
+                        <td>@m.Str("PROBLEM")</td>
+                        <td>@m.Str("NAME")</td>
+                        <td class="nowrap">@m.Str("SUBMIT_DATE")</td>
+                        <td><span class="badge @Ui.Badge(status)">@status</span></td>
+                        <td>
+                            <div class="btn-row">
+                                <form asp-action="MaintenanceStatus" asp-route-id="@id" method="post" class="inline">
+                                    <input type="hidden" name="status" value="WORK IN PROGRESS" />
+                                    <button class="btn btn-ghost btn-sm" type="submit">In progress</button>
+                                </form>
+                                <form asp-action="MaintenanceStatus" asp-route-id="@id" method="post" class="inline">
+                                    <input type="hidden" name="status" value="COMPLETE" />
+                                    <button class="btn btn-ok btn-sm" type="submit">Complete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <h2 class="mt">Room prices</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Room</th><th>Type</th><th class="num">Price / night (BDT)</th><th>Change price</th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Rooms)
+            {
+                <tr>
+                    <td>@r.Str("ROOM_ID")</td>
+                    <td>@r.Str("TYPE")</td>
+                    <td class="num">@r.Int("PPN").ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</td>
+                    <td>
+                        <form asp-action="SetPrice" method="post" class="mini-form">
+                            <input type="hidden" name="roomId" value="@r.Str("ROOM_ID")" />
+                            <input type="number" name="price" min="0" max="10000000" value="@r.Int("PPN")" required />
+                            <button class="btn btn-sm" type="submit">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

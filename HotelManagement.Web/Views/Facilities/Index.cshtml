@@ -1,0 +1,53 @@
+@model FacilitiesVm
+@{
+    ViewData["Title"] = "Facilities";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Hotel Facilities</h1>
+            <p>Reserve a spot at our pool, spa, gym and more.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-auto" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        @foreach (var f in FacilityCatalog.All)
+        {
+            <div class="card facility">
+                <img src="~/img/icons/@(f.Icon).png" alt="" />
+                <h3>@f.Name</h3>
+                <p class="muted" style="min-height:3.2em">@f.Description</p>
+                <div class="price">@Ui.Money(f.Price) <small>@f.Unit</small></div>
+                <p class="hint">Max @f.MaxUnits @((f.MaxUnits == 1 ? f.UnitLabel.TrimEnd('s') : f.UnitLabel).ToLowerInvariant())</p>
+                <a class="btn btn-gold btn-block" asp-action="Book" asp-route-name="@f.Name">Book now</a>
+            </div>
+        }
+    </div>
+
+    <h2 class="mt">My facility bookings</h2>
+    @if (Model.MyBookings.Count == 0)
+    {
+        <div class="card empty">You have not booked any facility yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Facility</th><th>Date</th><th class="num">Guests / hours</th><th class="num">Total</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var b in Model.MyBookings)
+                {
+                    <tr>
+                        <td>@b.Str("FACILITY_BOOKING_ID")</td>
+                        <td>@b.Str("FACILITY_NAME")</td>
+                        <td>@b.DateStr("BOOKING_DATE")</td>
+                        <td class="num">@b.Str("GUESTS_COUNT")</td>
+                        <td class="num">@Ui.Money(b.Dec("TOTAL_PRICE"))</td>
+                        <td><span class="badge @Ui.Badge(b.Str("BOOKING_STATUS"))">@b.Str("BOOKING_STATUS")</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

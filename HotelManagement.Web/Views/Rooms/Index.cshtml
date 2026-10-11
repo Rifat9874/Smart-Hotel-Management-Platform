@@ -1,0 +1,86 @@
+@model RoomListVm
+@{
+    ViewData["Title"] = "Rooms";
+    string ci = Ui.D(Model.CheckIn);
+    string co = Ui.D(Model.CheckOut);
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Our Rooms</h1>
+            <p>Pick your dates to see which rooms are free. @Model.Nights night@(Model.Nights == 1 ? "" : "s") selected.</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="flash flash-error" style="margin:0 0 16px">@Model.Error</div>
+    }
+
+    <form method="get" asp-action="Index" class="filter-bar">
+        <div class="field">
+            <label for="checkIn">Check-in</label>
+            <input id="checkIn" name="checkIn" type="date" value="@ci" data-checkin />
+        </div>
+        <div class="field">
+            <label for="checkOut">Check-out</label>
+            <input id="checkOut" name="checkOut" type="date" value="@co" data-checkout />
+        </div>
+        <div class="field">
+            <label for="q">Search room type</label>
+            <input id="q" name="q" type="text" placeholder="e.g. Suite" value="@Model.Search" maxlength="50" />
+        </div>
+        <div class="field">
+            <label for="show">Show</label>
+            <select id="show" name="show">
+                <option value="" selected="@(Model.Show == "")">All rooms</option>
+                <option value="available" selected="@(Model.Show == "available")">Available only</option>
+                <option value="booked" selected="@(Model.Show == "booked")">Booked only</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="sort">Sort by</label>
+            <select id="sort" name="sort">
+                <option value="" selected="@(Model.Sort == "")">Room number</option>
+                <option value="alpha" selected="@(Model.Sort == "alpha")">Name (A-Z)</option>
+                <option value="low" selected="@(Model.Sort == "low")">Price: low to high</option>
+                <option value="high" selected="@(Model.Sort == "high")">Price: high to low</option>
+            </select>
+        </div>
+        <button class="btn btn-gold" type="submit">Search</button>
+    </form>
+
+    @if (Model.Rooms.Count == 0)
+    {
+        <div class="card empty">No rooms match your search.</div>
+    }
+    else
+    {
+        <div class="grid grid-auto">
+            @foreach (var r in Model.Rooms)
+            {
+                var available = r.Int("IS_AVAILABLE") == 1;
+                var ppn = r.Int("PPN");
+                <article class="room-card">
+                    <a class="photo" asp-action="Details" asp-route-id="@r.Str("ROOM_ID")" asp-route-checkIn="@ci" asp-route-checkOut="@co">
+                        <img src="@RoomImages.Thumb(r.Str("PICTURE"))" alt="@r.Str("TYPE")" loading="lazy" />
+                        <span class="badge @(available ? "b-ok" : "b-bad")">@(available ? "Available" : "Booked")</span>
+                    </a>
+                    <div class="body">
+                        <div class="room-id">Room @r.Str("ROOM_ID")</div>
+                        <h3>@r.Str("TYPE")</h3>
+                        <div class="desc">@r.Str("DESCRIPTION")</div>
+                        <div class="price">@Ui.Money(ppn) <small>/ night</small></div>
+                        @if (Model.Nights > 1)
+                        {
+                            <div class="hint">@Model.Nights nights: @Ui.Money(ppn * Model.Nights)</div>
+                        }
+                        <a class="btn @(available ? "" : "btn-ghost")" asp-action="Details" asp-route-id="@r.Str("ROOM_ID")" asp-route-checkIn="@ci" asp-route-checkOut="@co">
+                            @(available ? "View & book" : "View details")
+                        </a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>

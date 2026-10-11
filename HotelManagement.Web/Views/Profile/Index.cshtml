@@ -1,0 +1,133 @@
+@model ProfileVm
+@{
+    ViewData["Title"] = "My bookings";
+    var me = Model.Customer;
+    var pending = Model.Bookings.Where(b => b.Str("BOOKING_STATUS").Equals("PENDING", StringComparison.OrdinalIgnoreCase)).ToList();
+}
+<div class="container page">
+    <div class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+        <div class="avatar" style="width:64px;height:64px;font-size:1.4rem">@Ui.Initials(me.Str("NAME"))</div>
+        <div style="flex:1;min-width:200px">
+            <h1 style="margin:0">@me.Str("NAME")</h1>
+            <div class="muted">@me.Str("EMAIL") &middot; @me.Str("PHONE_NUMBER")</div>
+        </div>
+        <div class="btn-row">
+            <a class="btn btn-ghost" asp-action="Edit">Edit info</a>
+            <a class="btn btn-gold" asp-controller="Rooms" asp-action="Index">Book a room</a>
+            <a class="btn" asp-controller="Facilities" asp-action="Index">Facilities</a>
+        </div>
+    </div>
+
+    @if (pending.Count > 0)
+    {
+        <div class="notice mt">
+            <strong>@pending.Count booking@(pending.Count == 1 ? "" : "s") waiting for payment.</strong>
+            Rooms are held for you until you pay or cancel.
+        </div>
+    }
+
+    <h2 class="mt">My bookings</h2>
+    @if (Model.Bookings.Count == 0)
+    {
+        <div class="card empty">You have no bookings yet. <a asp-controller="Rooms" asp-action="Index">Find a room</a></div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Booked on</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var b in Model.Bookings)
+                {
+                    var status = b.Str("BOOKING_STATUS").ToUpperInvariant();
+                    var id = b.Str("BOOKING_ID");
+                    <tr>
+                        <td>@id</td>
+                        <td>@b.Str("ROOM_ID") <span class="muted">@b.Str("TYPE")</span></td>
+                        <td class="nowrap">@b.DateStr("CHECK_IN")</td>
+                        <td class="nowrap">@b.DateStr("CHECK_OUT")</td>
+                        <td class="nowrap">@b.Str("BOOKING_DATE")</td>
+                        <td><span class="badge @Ui.Badge(status)">@status</span></td>
+                        <td>
+                            <div class="btn-row">
+                                @if (status == "PENDING")
+                                {
+                                    <a class="btn btn-gold btn-sm" asp-controller="Payment" asp-action="Pay" asp-route-id="@id">Pay now</a>
+                                }
+                                @if (status != "PENDING" && status != "CANCELLED")
+                                {
+                                    <a class="btn btn-ghost btn-sm" asp-controller="Payment" asp-action="Receipt" asp-route-id="@id">Receipt</a>
+                                }
+                                @if (status == "PENDING" || status == "PAID" || status == "BOOKED")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@id" method="post" class="inline" data-confirm="Cancel booking #@id?">
+                                        <button class="btn btn-danger btn-sm" type="submit">Cancel</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="grid grid-2 mt">
+        <div class="card">
+            <h2>Rate your stay</h2>
+            @if (Model.ReviewableBookings.Count == 0)
+            {
+                <p class="muted">After you check out you can leave a review here.</p>
+            }
+            else
+            {
+                <form asp-action="Review" method="post" class="stack">
+                    <div class="field">
+                        <label for="bookingId">Booking</label>
+                        <select id="bookingId" name="bookingId" required>
+                            @foreach (var r in Model.ReviewableBookings)
+                            {
+                                <option value="@r.Str("BOOKING_ID")">#@r.Str("BOOKING_ID") - Room @r.Str("ROOM_ID") (@r.DateStr("CHECK_IN") to @r.DateStr("CHECK_OUT"))</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Rating</label>
+                        <div class="rating-input">
+                            @for (int i = 5; i >= 1; i--)
+                            {
+                                <label><input type="radio" name="rating" value="@i" required checked="@(i == 5)" /> @i &#9733;</label>
+                            }
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="comments">Comments</label>
+                        <textarea id="comments" name="comments" maxlength="1000" required></textarea>
+                    </div>
+                    <button class="btn" type="submit">Submit review</button>
+                </form>
+            }
+        </div>
+
+        <div class="card">
+            <h2>My reviews</h2>
+            @if (Model.MyReviews.Count == 0)
+            {
+                <p class="muted">You have not written any reviews yet.</p>
+            }
+            else
+            {
+                foreach (var v in Model.MyReviews)
+                {
+                    <div style="padding:10px 0;border-bottom:1px dashed var(--line)">
+                        <div><span style="color:var(--gold)">@Ui.Stars(v.Int("RATING"))</span> <span class="muted">booking #@v.Str("BOOKING_ID")</span></div>
+                        <div>@v.Str("COMMENTS")</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

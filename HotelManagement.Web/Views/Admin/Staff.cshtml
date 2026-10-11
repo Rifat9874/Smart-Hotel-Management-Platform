@@ -1,0 +1,67 @@
+@model List<Row>
+@{
+    ViewData["Title"] = "Staff & salary";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Staff &amp; salary</h1>
+            <p>Net salary = basic + allowances + bonus - deductions.</p>
+        </div>
+        <a class="btn btn-gold" asp-action="AddEmployee">Add employee</a>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="card empty">No employees yet.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Employee</th><th>Role</th><th>Joined</th><th class="num">Basic</th><th class="num">Allow.</th><th class="num">Bonus</th><th class="num">Deduct.</th><th class="num">Net</th><th>Salary</th><th>Bonus</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var e in Model)
+                {
+                    var email = e.Str("EMAIL");
+                    <tr>
+                        <td>@e.Str("NAME")<div class="muted" style="font-size:.8rem">@email</div></td>
+                        <td>@e.Str("USER_TYPE").ToLowerInvariant()<div class="muted" style="font-size:.8rem">@(e.IsNull("POSITION") ? "" : e.Str("POSITION"))</div></td>
+                        <td class="nowrap">@(e.IsNull("JOIN_DATE") ? "-" : e.DateStr("JOIN_DATE"))</td>
+                        <td class="num">@(e.IsNull("SALARY_AMOUNT") ? "-" : e.Dec("SALARY_AMOUNT").ToString("N0", System.Globalization.CultureInfo.InvariantCulture))</td>
+                        <td class="num">@e.Dec("ALLOWANCES").ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num" style="color:var(--ok);font-weight:700">@e.Dec("BONUS_AMOUNT").ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num">@e.Dec("DEDUCTIONS").ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num"><strong>@e.Dec("NET_SALARY").ToString("N0", System.Globalization.CultureInfo.InvariantCulture)</strong></td>
+                        <td>
+                            <form asp-action="UpdateSalary" method="post" class="mini-form">
+                                <input type="hidden" name="email" value="@email" />
+                                <input type="number" name="salary" min="1" step="100" placeholder="New basic" required />
+                                <button class="btn btn-sm" type="submit">Set</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form asp-action="AddBonus" method="post" class="mini-form">
+                                <input type="hidden" name="email" value="@email" />
+                                <input type="number" name="bonus" min="1" step="100" placeholder="Amount" required />
+                                <input type="text" name="reason" maxlength="100" placeholder="Reason" required />
+                                <button class="btn btn-ok btn-sm" type="submit">Add</button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="btn-row">
+                                <a class="btn btn-ghost btn-sm" asp-action="BonusHistory" asp-route-email="@email">Bonuses</a>
+                                <form asp-action="RemoveEmployee" asp-route-email="@email" method="post" class="inline" data-confirm="Remove @e.Str("NAME") and all their leave, task and salary records?">
+                                    <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

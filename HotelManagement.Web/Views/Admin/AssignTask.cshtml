@@ -1,0 +1,76 @@
+@model AssignTaskVm
+@{
+    ViewData["Title"] = "Assign tasks";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Assign housekeeping</h1>
+            <p>Give a room to a staff member. It starts as DIRTY until they mark it cleaned.</p>
+        </div>
+    </div>
+
+    <div class="split">
+        <div>
+            <h2>Recent assignments</h2>
+            @if (Model.Assignments.Count == 0)
+            {
+                <div class="card empty">No assignments yet.</div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>#</th><th>Room</th><th>Staff</th><th>Assigned on</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var a in Model.Assignments)
+                        {
+                            <tr>
+                                <td>@a.Str("ASSIGNMENT_ID")</td>
+                                <td>@a.Str("ROOM_ID")</td>
+                                <td>@a.Str("NAME")</td>
+                                <td>@a.DateStr("ASSIGNED_DATE")</td>
+                                <td><span class="badge @Ui.Badge(a.Str("ROOM_STATUS"))">@a.Str("ROOM_STATUS").ToUpperInvariant()</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <h2>New assignment</h2>
+            @if (Model.StaffList.Count == 0)
+            {
+                <p class="muted">There is no staff member yet. Add one from <a asp-action="AddEmployee">Add employee</a>.</p>
+            }
+            else
+            {
+                <form asp-action="AssignTask" method="post" class="stack">
+                    <div class="field">
+                        <label for="staffEmail">Staff member</label>
+                        <select id="staffEmail" name="staffEmail" required>
+                            <option value="">Select staff</option>
+                            @foreach (var s in Model.StaffList)
+                            {
+                                <option value="@s.Str("EMAIL")">@s.Str("NAME")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="roomId">Room</label>
+                        <select id="roomId" name="roomId" required>
+                            <option value="">Select room</option>
+                            @foreach (var r in Model.RoomIds)
+                            {
+                                <option value="@r">@r</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-gold" type="submit">Assign</button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

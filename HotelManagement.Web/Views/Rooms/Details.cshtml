@@ -1,0 +1,115 @@
+@model RoomDetailsVm
+@{
+    var room = Model.Room;
+    ViewData["Title"] = room.Str("TYPE") + " - Room " + room.Str("ROOM_ID");
+    string ci = Ui.D(Model.CheckIn);
+    string co = Ui.D(Model.CheckOut);
+    var ppn = room.Int("PPN");
+    var total = ppn * Model.Nights;
+    var isCustomer = User.Identity?.IsAuthenticated == true && User.Role() == "CUSTOMER";
+    var isGuest = User.Identity?.IsAuthenticated != true;
+    string[] Split(string? s) => (s ?? "").Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+<div class="container page">
+    <p><a asp-action="Index" asp-route-checkIn="@ci" asp-route-checkOut="@co">&larr; Back to rooms</a></p>
+
+    <div class="split">
+        <div>
+            <div class="gallery-main"><img data-gallery-main src="@Model.Images[0]" alt="@room.Str("TYPE")" /></div>
+            @if (Model.Images.Count > 1)
+            {
+                <div class="gallery-thumbs">
+                    @for (int i = 0; i < Model.Images.Count; i++)
+                    {
+                        <button type="button" class="@(i == 0 ? "active" : "")" data-gallery-thumb="@Model.Images[i]" aria-label="Photo @(i + 1)">
+                            <img src="@Model.Images[i]" alt="" loading="lazy" />
+                        </button>
+                    }
+                </div>
+            }
+
+            <div class="card mt">
+                <div class="room-id">Room @room.Str("ROOM_ID")</div>
+                <h1>@room.Str("TYPE")</h1>
+                <p>@room.Str("DESCRIPTION")</p>
+
+                @if (Split(room.Str("FEATURES")).Length > 0)
+                {
+                    <h3>Features</h3>
+                    <ul>
+                        @foreach (var f in Split(room.Str("FEATURES"))) { <li>@f</li> }
+                    </ul>
+                }
+                @if (Split(room.Str("COMPLIMENTARY")).Length > 0)
+                {
+                    <h3>Complimentary</h3>
+                    <ul>
+                        @foreach (var c in Split(room.Str("COMPLIMENTARY"))) { <li>@c</li> }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <aside>
+            <div class="card">
+                <div class="price">@Ui.Money(ppn) <small>/ night</small></div>
+
+                <form method="get" asp-action="Details" asp-route-id="@room.Str("ROOM_ID")" class="stack mt">
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="checkIn">Check-in</label>
+                            <input id="checkIn" name="checkIn" type="date" value="@ci" min="@Ui.D(Model.Today)" data-checkin />
+                        </div>
+                        <div class="field">
+                            <label for="checkOut">Check-out</label>
+                            <input id="checkOut" name="checkOut" type="date" value="@co" data-checkout />
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-block" type="submit">Check availability</button>
+                </form>
+
+                <div class="mt">
+                    <div class="summary-line"><span>@Model.Nights night@(Model.Nights == 1 ? "" : "s") x @Ui.Money(ppn)</span><span>@Ui.Money(total)</span></div>
+                    <div class="summary-total"><span>Total</span><span>@Ui.Money(total)</span></div>
+                </div>
+
+                <div class="mt">
+                    @if (!Model.Available)
+                    {
+                        <div class="flash flash-error" style="margin:0">Sorry, this room is booked for the selected dates. Try other dates.</div>
+                    }
+                    else if (isCustomer)
+                    {
+                        <form method="post" asp-action="Book" asp-route-id="@room.Str("ROOM_ID")">
+                            <input type="hidden" name="checkIn" value="@ci" />
+                            <input type="hidden" name="checkOut" value="@co" />
+                            <button class="btn btn-gold btn-lg btn-block" type="submit">Book now</button>
+                        </form>
+                        <p class="hint center mt">You pay on the next page. The room is held until you do.</p>
+                    }
+                    else if (isGuest)
+                    {
+                        <a class="btn btn-gold btn-lg btn-block" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">Login to book</a>
+                    }
+                    else
+                    {
+                        <div class="notice">Only customer accounts can book rooms.</div>
+                    }
+                </div>
+            </div>
+
+            @if (Model.BookedRanges.Count > 0)
+            {
+                <div class="card">
+                    <h3>Already booked</h3>
+                    <ul class="facts">
+                        @foreach (var b in Model.BookedRanges)
+                        {
+                            <li>@b.DateStr("CHECK_IN") &rarr; @b.DateStr("CHECK_OUT")</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </aside>
+    </div>
+</div>

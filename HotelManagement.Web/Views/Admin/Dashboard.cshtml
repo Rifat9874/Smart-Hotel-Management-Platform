@@ -1,0 +1,76 @@
+@model AdminDashboardVm
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Admin dashboard</h1>
+            <p>Welcome, @User.FullName(). Here is how the hotel is doing today.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-4">
+        <div class="stat"><div class="label">Total bookings</div><div class="value">@Model.TotalBookings</div></div>
+        <div class="stat blue"><div class="label">Occupied rooms</div><div class="value">@Model.OccupiedRooms</div></div>
+        <div class="stat green"><div class="label">Today's check-ins</div><div class="value">@Model.TodaysCheckIns</div></div>
+        <div class="stat"><div class="label">Today's revenue</div><div class="value" style="font-size:1.5rem">@Ui.Money(Model.TodaysRevenue)</div></div>
+    </div>
+
+    <div class="grid grid-2 mt" style="align-items:start">
+        <div>
+            <h2>Currently occupied rooms</h2>
+            @if (Model.Occupied.Count == 0)
+            {
+                <div class="card empty">No guests are checked in.</div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Room</th><th>Guest</th><th>Check-in</th><th>Check-out</th></tr></thead>
+                        <tbody>
+                        @foreach (var o in Model.Occupied)
+                        {
+                            <tr>
+                                <td>@o.Str("ROOM_ID")</td>
+                                <td>@o.Str("NAME")</td>
+                                <td class="nowrap">@o.DateStr("CHECK_IN")</td>
+                                <td class="nowrap">@o.DateStr("CHECK_OUT")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div>
+            <h2>Latest bookings</h2>
+            @if (Model.History.Count == 0)
+            {
+                <div class="card empty">No bookings yet.</div>
+            }
+            else
+            {
+                <div class="table-wrap" style="max-height:480px;overflow-y:auto">
+                    <table>
+                        <thead><tr><th>#</th><th>Room</th><th>Guest</th><th>Booked on</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var h in Model.History)
+                        {
+                            <tr>
+                                <td>@h.Str("BOOKING_ID")</td>
+                                <td>@h.Str("ROOM_ID")</td>
+                                <td>@h.Str("NAME")</td>
+                                <td class="nowrap">@h.Str("BOOKING_DATE")</td>
+                                <td><span class="badge @Ui.Badge(h.Str("BOOKING_STATUS"))">@h.Str("BOOKING_STATUS").ToUpperInvariant()</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

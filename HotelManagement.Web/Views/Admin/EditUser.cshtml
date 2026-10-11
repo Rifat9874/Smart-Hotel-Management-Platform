@@ -1,0 +1,35 @@
+@model Row
+@{
+    ViewData["Title"] = "Edit user";
+    var error = ViewData["Error"] as string;
+}
+<div class="container page" style="max-width:560px">
+    <div class="card">
+        <h1>Edit user</h1>
+        <p class="muted">@Model.Str("EMAIL") &middot; @Model.Str("USER_TYPE").ToLowerInvariant()</p>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="flash flash-error" style="margin:0 0 16px">@error</div>
+        }
+        <form asp-action="EditUser" method="post" class="stack">
+            <input type="hidden" name="email" value="@Model.Str("EMAIL")" />
+            <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" name="name" type="text" maxlength="50" value="@Model.Str("NAME")" required />
+            </div>
+            <div class="field">
+                <label for="phone">Phone number</label>
+                <input id="phone" name="phone" type="tel" inputmode="numeric" maxlength="11" value="@Model.Str("PHONE_NUMBER")" required />
+            </div>
+            <div class="field">
+                <label for="password">Reset password <span class="muted">(optional)</span></label>
+                <input id="password" name="password" type="password" autocomplete="new-password" />
+                <span class="hint">Passwords are stored as hashes, so the old one cannot be shown. Leave empty to keep it.</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-gold" type="submit">Save</button>
+                <a class="btn btn-ghost" asp-action="Users">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+@model DateRangeVm
+@{
+    ViewData["Title"] = "Booking report";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<div class="container page">
+    <div class="page-head">
+        <div>
+            <h1>Booking report</h1>
+            <p>Every booking made in the chosen period.</p>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="window.print()">Print</button>
+    </div>
+
+    <form method="get" asp-action="Reports" class="filter-bar">
+        <div class="field">
+            <label for="fromDate">From</label>
+            <input id="fromDate" name="fromDate" type="date" value="@Ui.D(Model.From)" />
+        </div>
+        <div class="field">
+            <label for="toDate">To</label>
+            <input id="toDate" name="toDate" type="date" value="@Ui.D(Model.To)" />
+        </div>
+        <button class="btn btn-gold" type="submit">Generate</button>
+    </form>
+
+    <div class="grid grid-2 mb">
+        <div class="stat blue"><div class="label">Bookings in period</div><div class="value">@Model.TotalBookings</div></div>
+        <div class="stat green"><div class="label">Revenue (paid bookings)</div><div class="value">@Ui.Money(Model.TotalRevenue)</div></div>
+    </div>
+
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="card empty">No bookings in this period.</div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th class="num">Nights</th><th class="num">Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@r.Str("BOOKING_ID")</td>
+                        <td>@r.Str("NAME")</td>
+                        <td>@r.Str("ROOM_ID")</td>
+                        <td class="nowrap">@r.DateStr("CHECK_IN")</td>
+                        <td class="nowrap">@r.DateStr("CHECK_OUT")</td>
+                        <td class="num">@r.Int("NIGHTS")</td>
+                        <td class="num">@r.Dec("AMOUNT").ToString("N0", inv)</td>
+                        <td><span class="badge @Ui.Badge(r.Str("BOOKING_STATUS"))">@r.Str("BOOKING_STATUS").ToUpperInvariant()</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
